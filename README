@@ -1,0 +1,57 @@
+* Feed RSS per CLI e DI *
+
+Brevemente:
+
+  Gli script operano sulle principali pagine delle news dei due siti
+  www.cli.di.unipi.it e www.di.unipi.it, operando in tre fasi distinte:
+
+  1. ricezione: viene cariacata la pagina contenente le notizie da estrarre
+  2. scremazione: il codice HTML della pagina in questione viene analizzato
+     per selezionare solo la parte relativa alle news del sito, riconosciuta
+     attraverso alcuni pattern
+  3. scomposizione/aggregazione: il codice viene dato in pasto al parser
+     impostato in modo opportuno, che automaticamente genera il file xml
+     corrispondente.
+
+  In questa esecuzione si da' per assunto che il file da analizzare sia
+  stato realizzato mediante script server-side, o in ogni caso seguendo
+  un pattern rigidamente ripetuto per la pubblicazione delle news.
+
+How it works:
+
+  gli script invocati dal browser vengono mascherati da file xml attraverso
+  l'estensione .py.xml . Questi "documenti" richiamano un secondo modulo
+  python (rss.py) specificando un parametro che servira' allo stesso modulo
+  per decide quali regole di parsing utilizzare. A questo scopo rss.py
+  richiama a sua volta altri moduli contenenti i parser specializzati per
+  il documento analizzato. In pratica:
+
+  rss_cli.py.xml --\                 /---> cli.py
+                    >--> rss.py --> <
+  rss_di.py.xml ---/                 \---> di.py
+
+
+Features:
+
+  - caching delle pagine: i file rss vengono rigenerati a partire dalla
+    pagina sorgente solo se sono trascorsi piu' di trnta minuti dalla
+    generazione dell'ultima pagina di cache
+
+  - gestione errori legati alla irraggiungibilita' delle sorgenti: in caso
+    di errori generici nella richiesta HTTP, viene utilizzata l'ultima
+    copia cache salvata
+
+Cosa manca:
+
+  - character encoding da controllare
+
+  - validazione dei feed tramite i tool w3c http://validator.w3.org/feed - FATTO per DI.xml
+
+
+Cosa si dovrebbe fare:
+
+  - Il sistema, per come viene impostato ora, necessita di un nuovo subclassing
+    del parser ogniqualvolta si vuole aggiungere una nuova sorgente. Sarebbe
+    molto piu' efficace un sistema che utilizzi un unico parser il quale
+    puo' essere impostato attraverso dei pattern o una serie di regole (xml?)
+    per l'analisi di diverse fonti.
